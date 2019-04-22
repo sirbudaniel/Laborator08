@@ -10,7 +10,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 
 import ro.pub.cs.systems.eim.lab08.chatservicejmdns.R;
 import ro.pub.cs.systems.eim.lab08.chatservicejmdns.controller.NetworkServiceAdapter;
@@ -93,6 +100,33 @@ public class ChatNetworkServiceFragment extends Fragment {
 	// get a list of network interfaces available on the phone
 	// get a list of IPv4 addresses associated with these interfaces
 	// Update the textview with the local addresses
+
+        Enumeration interfaces = null;
+        try {
+            interfaces = NetworkInterface.getNetworkInterfaces();
+        } catch (IOException e){
+            Log.e(Constants.TAG, "Could not query interface list: " + e.getMessage());
+            if (Constants.DEBUG) {
+                e.printStackTrace();
+            }
+        }
+        String IPs = "";
+        while(interfaces.hasMoreElements())
+        {
+            NetworkInterface n = (NetworkInterface) interfaces.nextElement();
+            Enumeration ee = n.getInetAddresses();
+            while (ee.hasMoreElements())
+            {
+                InetAddress i = (InetAddress) ee.nextElement();
+                if (i instanceof Inet4Address) {
+                    if(IPs.length() > 0)
+                        IPs += ", ";
+                    IPs += i.getHostAddress().toString();
+                }
+            }
+        }
+        TextView LocalIPs = (TextView)view.findViewById(R.id.service_discovery_local_addr);
+        LocalIPs.setText(IPs);
         return view;
     }
 
